@@ -132,6 +132,7 @@ const Pricing = () => {
                   className={`w-full ${
                     plan.isPopular ? 'btn-gold' : 'btn-silver'
                   }`}
+                  onClick={() => window.location.href = '/dashboard'}
                 >
                   {plan.buttonText}
                 </Button>

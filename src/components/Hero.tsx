@@ -39,7 +39,10 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button className="btn-gold text-lg">
+            <Button 
+              className="btn-gold text-lg"
+              onClick={() => window.location.href = '/dashboard'}
+            >
               Get Started Free
             </Button>
             <Button variant="outline" className="btn-silver text-lg">
