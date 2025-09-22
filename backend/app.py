@@ -17,11 +17,8 @@ CORS(app,
 def api_extract_leads():
     # Handle preflight OPTIONS request
     if request.method == 'OPTIONS':
-        response = jsonify({'status': 'OK'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        return response
+        return jsonify({'status': 'OK'})
+        
     try:
         data = request.get_json()
         
@@ -102,15 +99,6 @@ def download_file(filename):
 @app.route('/', methods=['GET'])
 def root():
     return jsonify({'message': 'HK Grow Backend API is running'})
-
-# Add global after_request handler for additional CORS support
-@app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
-    response.headers.add('Access-Control-Allow-Credentials', 'false')
-    return response
 
 # For Vercel deployment
 if __name__ != '__main__':
