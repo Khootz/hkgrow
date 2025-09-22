@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import json
+import os
 from lead_extractor import extract_leads
 
 app = Flask(__name__)
@@ -46,8 +47,18 @@ def api_extract_leads():
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
-    return jsonify({'status': 'healthy'})
+    return jsonify({'status': 'healthy', 'message': 'Backend is running'})
 
-if __name__ == '__main__':
-    print("Starting Flask server...")
-    app.run(debug=True, host='127.0.0.1', port=5000)
+@app.route('/', methods=['GET'])
+def root():
+    return jsonify({'message': 'HK Grow Backend API is running'})
+
+# For Vercel deployment
+if __name__ != '__main__':
+    # This is for Vercel
+    application = app
+else:
+    # This is for local development
+    if __name__ == "__main__":
+        print("Starting Flask server...")
+        app.run(debug=True, host='127.0.0.1', port=5000)

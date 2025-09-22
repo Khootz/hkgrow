@@ -56,8 +56,16 @@ export default function LeadsPage() {
     setIsExtracting(true);
     setExtractionResult(null);
 
+    // Define API URL at the start so it's available in catch block
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 
+      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+        ? 'http://127.0.0.1:5000' 
+        : 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app');
+
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/extract-leads', {
+      console.log('Connecting to backend:', `${API_BASE_URL}/api/extract-leads`);
+
+      const response = await fetch(`${API_BASE_URL}/api/extract-leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -85,9 +93,33 @@ export default function LeadsPage() {
       }
     } catch (error) {
       console.error('Extraction failed:', error);
+      
+      let errorMessage = 'An unexpected error occurred.';
+      
+      if (error instanceof Error) {
+        if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          errorMessage = `🚨 Cannot connect to backend server.
+          
+Local Development: Make sure to run: python backend/app.py
+Production: Backend should be available at: ${API_BASE_URL}
+
+Check the console for more details.`;
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = `🌐 Network connection failed. 
+
+Backend URL: ${API_BASE_URL}
+Please check:
+1. Internet connection
+2. Backend server status
+3. CORS configuration`;
+        } else {
+          errorMessage = `❌ Error: ${error.message}`;
+        }
+      }
+      
       setExtractionResult({
         success: false,
-        message: 'Failed to connect to the backend. Make sure the Python server is running.'
+        message: errorMessage
       });
     } finally {
       setIsExtracting(false);
