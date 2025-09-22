@@ -136,7 +136,9 @@ def extract_leads(keywords: str, location: str, category: str = "") -> dict:
         # Create filename based on keywords
         safe_keywords = "".join(c for c in keywords if c.isalnum() or c in (' ', '-', '_')).rstrip()
         safe_keywords = safe_keywords.replace(' ', '_')
-        filename = f"c:/Users/User/Desktop/hkgrow/backend/exports/{safe_keywords}.csv"
+        # Use /tmp for Vercel deployment or local exports folder
+        base_dir = "/tmp" if os.environ.get("VERCEL") else "exports"
+        filename = f"{base_dir}/{safe_keywords}.csv"
         
         # Save to CSV
         save_csv(records, filename)
