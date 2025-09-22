@@ -57,10 +57,7 @@ export default function LeadsPage() {
     setExtractionResult(null);
 
     // Define API URL at the start so it's available in catch block
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 
-      (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-        ? 'http://127.0.0.1:5000' 
-        : 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app');
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app';
 
     try {
       console.log('Connecting to backend:', `${API_BASE_URL}/api/extract-leads`);
@@ -126,6 +123,21 @@ Please check:
     }
   };
 
+  const handleDownloadCSV = () => {
+    if (extractionResult?.data?.filename) {
+      // Create download link for the CSV file
+      const downloadUrl = `${process.env.REACT_APP_API_URL || 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app'}/api/download/${extractionResult.data.filename.split('/').pop()}`;
+      
+      // Create a temporary link and trigger download
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.download = extractionResult.data.filename.split('/').pop() || 'leads.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -145,9 +157,20 @@ Please check:
         }`}>
           <p>{extractionResult.message}</p>
           {extractionResult.success && extractionResult.data && (
-            <p className="text-sm mt-2 text-white/60">
-              File saved: {extractionResult.data.filename?.split('/').pop()}
-            </p>
+            <div className="mt-3 flex items-center justify-between">
+              <p className="text-sm text-white/60">
+                File saved: {extractionResult.data.filename?.split('/').pop()}
+              </p>
+              <Button
+                onClick={handleDownloadCSV}
+                variant="outline"
+                size="sm"
+                className="border-green-500/20 text-green-400 hover:bg-green-500/10"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Download CSV
+              </Button>
+            </div>
           )}
         </div>
       )}

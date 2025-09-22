@@ -49,6 +49,25 @@ def api_extract_leads():
 def health_check():
     return jsonify({'status': 'healthy', 'message': 'Backend is running'})
 
+@app.route('/api/download/<filename>', methods=['GET'])
+def download_file(filename):
+    try:
+        # Ensure the filename is safe and exists
+        import os
+        from flask import send_file
+        
+        # Construct the full path to the file
+        file_path = os.path.join('exports', filename)
+        
+        if os.path.exists(file_path):
+            return send_file(file_path, as_attachment=True, download_name=filename)
+        else:
+            return jsonify({'error': 'File not found'}), 404
+            
+    except Exception as e:
+        print(f"Error downloading file: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/', methods=['GET'])
 def root():
     return jsonify({'message': 'HK Grow Backend API is running'})
