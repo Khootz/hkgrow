@@ -122,6 +122,8 @@ export default function LeadsPage() {
     // Define API URL at the start so it's available in catch block
     const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-owd33zr98-thiens-projects-80bfe1b8.vercel.app';
     console.log('🔧 DEBUG: Extraction using API URL:', API_BASE_URL);
+    console.log('🔧 DEBUG: All environment variables:', import.meta.env);
+    console.log('🔧 DEBUG: VITE_API_URL specifically:', import.meta.env.VITE_API_URL);
 
     try {
       addDebugLog(`🚀 Starting extraction with keywords: "${keywords}", location: "${location}"`);
@@ -158,6 +160,9 @@ export default function LeadsPage() {
       clearTimeout(timeoutId);
       addDebugLog(`📈 Response received! Status: ${response.status} ${response.statusText}`);
       addDebugLog(`🔍 Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+      addDebugLog(`🔍 Response URL: ${response.url}`);
+      addDebugLog(`🔍 Response type: ${response.type}`);
+      addDebugLog(`🔍 Response redirected: ${response.redirected}`);
 
       if (!response.ok) {
         addDebugLog(`❌ Response not OK: ${response.status}`);
