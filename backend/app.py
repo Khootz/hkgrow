@@ -69,13 +69,31 @@ def download_file(filename):
         import os
         from flask import send_file
         
+        # Enhanced Vercel/serverless environment detection
+        is_vercel = (
+            os.environ.get("VERCEL") == "1" or 
+            os.environ.get("VERCEL_ENV") is not None or 
+            "/var/task" in os.environ.get("PYTHONPATH", "") or
+            os.path.exists("/tmp") and not os.path.exists("C:\\")
+        )
+        
+        if is_vercel:
+            base_dir = "/tmp"
+            print(f"🔧 Using Vercel serverless directory for download: {base_dir}")
+        else:
+            base_dir = "exports"
+            print(f"🔧 Using local directory for download: {base_dir}")
+        
         # Construct the full path to the file
-        file_path = os.path.join('exports', filename)
+        file_path = os.path.join(base_dir, filename)
+        print(f"📥 Attempting to download file: {file_path}")
         
         if os.path.exists(file_path):
+            print(f"✅ File found, sending: {file_path}")
             return send_file(file_path, as_attachment=True, download_name=filename)
         else:
-            return jsonify({'error': 'File not found'}), 404
+            print(f"❌ File not found: {file_path}")
+            return jsonify({'error': f'File not found: {filename}'}), 404
             
     except Exception as e:
         print(f"Error downloading file: {str(e)}")
