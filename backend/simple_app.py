@@ -16,6 +16,15 @@ CORS(app,
 # Your Google Maps API Key
 API_KEY = "AIzaSyB1wtsPtU3a4zB9PwcdbhgFhgLqJlQneew"
 
+# Add CORS headers to all responses
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'false')
+    return response
+
 @app.route('/', methods=['GET'])
 def home():
     return jsonify({"message": "HK Grow Backend API is running on Vercel!", "cors": "enabled"})

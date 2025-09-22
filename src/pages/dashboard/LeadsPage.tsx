@@ -41,12 +41,64 @@ export default function LeadsPage() {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
   const [isExtracting, setIsExtracting] = useState(false);
+  const [isTestingConnection, setIsTestingConnection] = useState(false);
   const [extractionResult, setExtractionResult] = useState<{
     success: boolean;
     message: string;
     data?: any;
   } | null>(null);
   const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
+  // Test backend connection
+  const testConnection = async () => {
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-n2ye94dqf-thiens-projects-80bfe1b8.vercel.app';
+    
+    const addDebugLog = (message: string) => {
+      const timestamp = new Date().toLocaleTimeString();
+      const logMessage = `[${timestamp}] ${message}`;
+      console.log(logMessage);
+      setDebugInfo(prev => [...prev, logMessage]);
+    };
+
+    setIsTestingConnection(true);
+    setDebugInfo([]);
+
+    try {
+      addDebugLog(`🧪 Testing connection to: ${API_BASE_URL}/api/health`);
+      
+      const response = await fetch(`${API_BASE_URL}/api/health`, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+      });
+
+      addDebugLog(`📈 Health check response: ${response.status} ${response.statusText}`);
+      addDebugLog(`🔍 Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+
+      if (response.ok) {
+        const result = await response.json();
+        addDebugLog(`✅ Connection successful! Response: ${JSON.stringify(result)}`);
+        setExtractionResult({
+          success: true,
+          message: `✅ Backend connection successful! Status: ${result.status}`,
+        });
+      } else {
+        addDebugLog(`❌ Health check failed: ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (error) {
+      addDebugLog(`💥 Connection test failed: ${error instanceof Error ? error.message : String(error)}`);
+      setExtractionResult({
+        success: false,
+        message: `❌ Connection failed: ${error instanceof Error ? error.message : String(error)}`,
+      });
+    } finally {
+      setIsTestingConnection(false);
+    }
+  };
 
   const handleStartExtraction = async () => {
     if (!keywords.trim() || !location.trim()) {
@@ -66,7 +118,7 @@ export default function LeadsPage() {
     };
 
     // Define API URL at the start so it's available in catch block
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://hkgrow-6sy004yzx-thiens-projects-80bfe1b8.vercel.app';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-n2ye94dqf-thiens-projects-80bfe1b8.vercel.app';
 
     try {
       addDebugLog(`🚀 Starting extraction with keywords: "${keywords}", location: "${location}"`);
@@ -205,7 +257,7 @@ Backend: ${API_BASE_URL}`;
   const handleDownloadCSV = () => {
     if (extractionResult?.data?.filename) {
       // Create download link for the CSV file
-      const downloadUrl = `${process.env.REACT_APP_API_URL || 'https://hkgrow-6sy004yzx-thiens-projects-80bfe1b8.vercel.app'}/api/download/${extractionResult.data.filename.split('/').pop()}`;
+      const downloadUrl = `${import.meta.env.VITE_API_URL || 'https://hkgrow-n2ye94dqf-thiens-projects-80bfe1b8.vercel.app'}/api/download/${extractionResult.data.filename.split('/').pop()}`;
       
       // Create a temporary link and trigger download
       const link = document.createElement('a');
@@ -348,18 +400,17 @@ Backend: ${API_BASE_URL}`;
                 <Button 
                   variant="outline" 
                   className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
-                  onClick={async () => {
-                    const API_URL = 'https://hkgrow-6sy004yzx-thiens-projects-80bfe1b8.vercel.app';
-                    try {
-                      const response = await fetch(`${API_URL}/api/health`);
-                      const result = await response.text();
-                      alert(`Health check: ${response.status} - ${result}`);
-                    } catch (e: any) {
-                      alert(`Health check failed: ${e.message}`);
-                    }
-                  }}
+                  onClick={testConnection}
+                  disabled={isTestingConnection}
                 >
-                  🏥 Test
+                  {isTestingConnection ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    "🩺 Test Connection"
+                  )}
                 </Button>
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   <Filter className="w-4 h-4 mr-2" />
