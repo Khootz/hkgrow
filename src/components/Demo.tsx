@@ -8,7 +8,7 @@ const Demo = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-5xl font-bold mb-6">
-            See <span className="text-gradient">LeadAI</span> in Action
+            See <span className="text-gradient">HK Grow</span> in Action
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Watch how our AI-powered platform transforms lead generation for businesses of all sizes.

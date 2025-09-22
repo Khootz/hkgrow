@@ -142,7 +142,7 @@ export default function LeadsPage() {
                     placeholder="e.g., coffee shop, restaurant, spa"
                     value={keywords}
                     onChange={(e) => setKeywords(e.target.value)}
-                    className="bg-glass-light border-white/20 text-white placeholder:text-white/40"
+                    className="bg-glass-light border-white/20 text-foreground placeholder:text-white/40"
                   />
                 </div>
                 <div className="space-y-2">
@@ -152,7 +152,7 @@ export default function LeadsPage() {
                     placeholder="e.g., Hong Kong, Central District"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
-                    className="bg-glass-light border-white/20 text-white placeholder:text-white/40"
+                    className="bg-glass-light border-white/20 text-foreground placeholder:text-white/40"
                   />
                 </div>
               </div>
@@ -160,15 +160,15 @@ export default function LeadsPage() {
               <div className="space-y-2">
                 <Label htmlFor="category" className="text-white">Business Category</Label>
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger className="bg-glass-light border-white/20 text-white">
+                  <SelectTrigger className="bg-glass-light border-white/20 text-foreground">
                     <SelectValue placeholder="Select category (optional)" />
                   </SelectTrigger>
-                  <SelectContent className="bg-glass-dark border-white/20">
-                    <SelectItem value="restaurant" className="text-white hover:bg-white/10">Restaurant</SelectItem>
-                    <SelectItem value="retail" className="text-white hover:bg-white/10">Retail</SelectItem>
-                    <SelectItem value="service" className="text-white hover:bg-white/10">Service</SelectItem>
-                    <SelectItem value="healthcare" className="text-white hover:bg-white/10">Healthcare</SelectItem>
-                    <SelectItem value="fitness" className="text-white hover:bg-white/10">Fitness</SelectItem>
+                  <SelectContent className="bg-popover border-white/20 backdrop-blur-xl z-50">
+                    <SelectItem value="restaurant" className="text-foreground hover:bg-white/10 focus:bg-white/10">Restaurant</SelectItem>
+                    <SelectItem value="retail" className="text-foreground hover:bg-white/10 focus:bg-white/10">Retail</SelectItem>
+                    <SelectItem value="service" className="text-foreground hover:bg-white/10 focus:bg-white/10">Service</SelectItem>
+                    <SelectItem value="healthcare" className="text-foreground hover:bg-white/10 focus:bg-white/10">Healthcare</SelectItem>
+                    <SelectItem value="fitness" className="text-foreground hover:bg-white/10 focus:bg-white/10">Fitness</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

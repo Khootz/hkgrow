@@ -42,22 +42,22 @@ export function DashboardSidebar() {
     isActive ? "bg-primary/20 text-primary border-primary/30" : "hover:bg-white/5 border-transparent";
 
   return (
-    <Sidebar className={`${collapsed ? "w-16" : "w-64"} border-r border-white/10`}>
-      <SidebarContent className="bg-glass-dark backdrop-blur-xl">
+    <Sidebar className={`${collapsed ? "w-16" : "w-64"} border-r border-sidebar-border bg-sidebar backdrop-blur-xl`}>
+      <SidebarContent className="bg-transparent">
         {/* Logo */}
-        <div className="p-4 border-b border-white/10">
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Zap className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
+              <Zap className="w-4 h-4 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <span className="text-lg font-bold text-white">LeadAI</span>
+              <span className="text-lg font-bold text-primary">HK Grow</span>
             )}
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-white/60 text-xs uppercase tracking-wider px-4 py-2">
+          <SidebarGroupLabel className="text-sidebar-foreground/60 text-xs uppercase tracking-wider px-4 py-2">
             Main Menu
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -69,7 +69,10 @@ export function DashboardSidebar() {
                       to={item.url} 
                       end 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-4 py-3 mx-2 rounded-lg border transition-all duration-200 ${getNavCls({ isActive })}`
+                        `flex items-center gap-3 px-4 py-3 mx-2 rounded-lg border transition-all duration-200 ${isActive 
+                          ? 'bg-sidebar-accent text-sidebar-primary-foreground border-l-2 border-primary' 
+                          : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                        }`
                       }
                     >
                       <item.icon className="w-4 h-4" />

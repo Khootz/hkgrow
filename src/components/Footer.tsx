@@ -34,7 +34,7 @@ const Footer = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="mb-4">
                 <div className="text-3xl font-bold">
-                  <span className="text-gradient">LeadAI</span>
+                  <span className="text-gradient">HK Grow</span>
                 </div>
               </div>
               <p className="text-muted-foreground mb-6 max-w-md">
@@ -77,7 +77,7 @@ const Footer = () => {
           </div>
 
           <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-            <p>&copy; 2024 LeadAI. All rights reserved. Built with AI for the future of business growth.</p>
+            <p>&copy; 2024 HK Grow. All rights reserved. Built with AI for the future of business growth.</p>
           </div>
         </div>
       </div>

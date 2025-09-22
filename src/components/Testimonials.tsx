@@ -17,7 +17,7 @@ const Testimonials = () => {
       name: "Michael Rodriguez",
       role: "Sales Manager", 
       company: "Growth Labs",
-      content: "LeadAI transformed our lead generation completely. The WhatsApp automation alone saved us 20 hours per week, and the email accuracy is incredible.",
+      content: "HK Grow transformed our lead generation completely. The WhatsApp automation alone saved us 20 hours per week, and the email accuracy is incredible.",
       rating: 5,
       avatar: "MR"
     },
