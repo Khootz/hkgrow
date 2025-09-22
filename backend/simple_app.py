@@ -5,21 +5,42 @@ import json
 from urllib.parse import urlencode
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS with specific settings for production
+CORS(app, 
+     origins=['*'],  # Allow all origins for now
+     methods=['GET', 'POST', 'OPTIONS'],
+     allow_headers=['Content-Type', 'Accept', 'Authorization'],
+     supports_credentials=False)
 
 # Your Google Maps API Key
 API_KEY = "AIzaSyB1wtsPtU3a4zB9PwcdbhgFhgLqJlQneew"
 
 @app.route('/', methods=['GET'])
 def home():
-    return jsonify({"message": "HK Grow Backend API is running on Vercel!"})
+    return jsonify({"message": "HK Grow Backend API is running on Vercel!", "cors": "enabled"})
 
-@app.route('/api/health', methods=['GET'])
+@app.route('/api/health', methods=['GET', 'OPTIONS'])
 def health():
-    return jsonify({"status": "healthy", "message": "Backend is running"})
+    if request.method == 'OPTIONS':
+        # Handle preflight request
+        response = jsonify({'status': 'OK'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        return response
+    
+    return jsonify({"status": "healthy", "message": "Backend is running", "cors": "enabled"})
 
-@app.route('/api/extract-leads', methods=['POST'])
+@app.route('/api/extract-leads', methods=['POST', 'OPTIONS'])
 def extract_leads():
+    # Handle preflight OPTIONS request explicitly
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'OK'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        return response
     try:
         data = request.json
         if not data:
@@ -53,45 +74,85 @@ def extract_leads():
         search_resp = requests.get(search_url, params=search_params, timeout=10).json()
         places = search_resp.get('results', [])[:5]  # Limit to 5
         
-        # Get detailed info for each place
-        leads = []
-        for place in places:
-            details_url = "https://maps.googleapis.com/maps/api/place/details/json"
-            details_params = {
-                'key': API_KEY,
-                'place_id': place['place_id'],
-                'fields': 'name,formatted_address,international_phone_number,website,rating,user_ratings_total'
+        # For testing, let's use mock data to isolate the CORS issue
+        mock_leads = [
+            {
+                'name': f'{keywords} Business 1',
+                'address': f'123 Main St, {location}',
+                'phone': '+852-1234-5678',
+                'website': 'https://example1.com',
+                'rating': 4.5,
+                'user_ratings_total': 123
+            },
+            {
+                'name': f'{keywords} Business 2',
+                'address': f'456 Central Ave, {location}',
+                'phone': '+852-8765-4321',
+                'website': 'https://example2.com',
+                'rating': 4.2,
+                'user_ratings_total': 89
+            },
+            {
+                'name': f'{keywords} Business 3',
+                'address': f'789 Queen St, {location}',
+                'phone': '+852-5555-1234',
+                'website': 'https://example3.com',
+                'rating': 4.7,
+                'user_ratings_total': 156
+            },
+            {
+                'name': f'{keywords} Business 4',
+                'address': f'321 King Rd, {location}',
+                'phone': '+852-9999-8888',
+                'website': 'https://example4.com',
+                'rating': 4.0,
+                'user_ratings_total': 67
+            },
+            {
+                'name': f'{keywords} Business 5',
+                'address': f'654 Harbor St, {location}',
+                'phone': '+852-7777-2222',
+                'website': 'https://example5.com',
+                'rating': 4.3,
+                'user_ratings_total': 234
             }
-            
-            try:
-                details_resp = requests.get(details_url, params=details_params, timeout=10).json()
-                result = details_resp.get('result', {})
-                
-                leads.append({
-                    'name': result.get('name', 'Unknown'),
-                    'address': result.get('formatted_address', ''),
-                    'phone': result.get('international_phone_number', ''),
-                    'website': result.get('website', ''),
-                    'rating': result.get('rating', ''),
-                    'user_ratings_total': result.get('user_ratings_total', '')
-                })
-            except:
-                continue
+        ]
         
-        return jsonify({
+        response_data = {
             'success': True,
-            'message': f'Successfully extracted {len(leads)} leads',
+            'message': f'Successfully extracted {len(mock_leads)} leads',
             'data': {
-                'leads': leads,
-                'records_count': len(leads),
+                'leads': mock_leads,
+                'records_count': len(mock_leads),
                 'location': location,
                 'keywords': keywords,
-                'filename': f"{keywords.replace(' ', '_')}.csv"
+                'filename': f"{keywords.replace(' ', '_').replace(',', '_')}.csv"
             }
-        })
+        }
+        
+        response = jsonify(response_data)
+        # Add explicit CORS headers
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        return response
         
     except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
+        error_response = jsonify({'success': False, 'error': f'Server error: {str(e)}'})
+        # Add CORS headers to error responses too
+        error_response.headers.add('Access-Control-Allow-Origin', '*')
+        error_response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization')
+        error_response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        return error_response, 500
+
+# Add global after_request handler for additional CORS support
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+    response.headers.add('Access-Control-Allow-Credentials', 'false')
+    return response
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)

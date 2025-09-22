@@ -66,7 +66,7 @@ export default function LeadsPage() {
     };
 
     // Define API URL at the start so it's available in catch block
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app';
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://hkgrow-6sy004yzx-thiens-projects-80bfe1b8.vercel.app';
 
     try {
       addDebugLog(`🚀 Starting extraction with keywords: "${keywords}", location: "${location}"`);
@@ -80,23 +80,38 @@ export default function LeadsPage() {
       };
       
       addDebugLog(`📦 Request payload: ${JSON.stringify(requestBody)}`);
+      addDebugLog(`⏰ Starting fetch request with 30s timeout...`);
+
+      // Add timeout to catch hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        addDebugLog(`⏰ Request timeout (30 seconds) - aborting...`);
+        controller.abort();
+      }, 30000);
 
       const response = await fetch(`${API_BASE_URL}/api/extract-leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
         },
-        body: JSON.stringify(requestBody)
+        mode: 'cors',
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       });
 
-      addDebugLog(`📈 Response status: ${response.status} ${response.statusText}`);
+      clearTimeout(timeoutId);
+      addDebugLog(`📈 Response received! Status: ${response.status} ${response.statusText}`);
       addDebugLog(`🔍 Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
 
       if (!response.ok) {
         addDebugLog(`❌ Response not OK: ${response.status}`);
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        addDebugLog(`❌ Error response body: ${errorText}`);
+        throw new Error(`HTTP ${response.status}: ${errorText || response.statusText}`);
       }
 
+      addDebugLog(`📥 Reading response JSON...`);
       const result = await response.json();
       addDebugLog(`📋 Response data: ${JSON.stringify(result, null, 2)}`);
       
@@ -115,30 +130,66 @@ export default function LeadsPage() {
         });
       }
     } catch (error) {
-      addDebugLog(`💥 Caught error: ${error}`);
+      addDebugLog(`💥 Caught error: ${error instanceof Error ? error.name : 'Unknown error'}`);
+      addDebugLog(`💥 Error message: ${error instanceof Error ? error.message : String(error)}`);
+      addDebugLog(`💥 Error type: ${typeof error}`);
       console.error('Extraction failed:', error);
       
       let errorMessage = 'An unexpected error occurred.';
       
       if (error instanceof Error) {
-        if (error.name === 'TypeError' && error.message.includes('fetch')) {
-          errorMessage = `🚨 Cannot connect to backend server.
+        if (error.name === 'AbortError') {
+          errorMessage = `⏰ Request Timed Out (30 seconds)
           
-Local Development: Make sure to run: python backend/app.py
-Production: Backend should be available at: ${API_BASE_URL}
-
-Check the console for more details.`;
-        } else if (error.message.includes('Failed to fetch')) {
-          errorMessage = `🌐 Network connection failed. 
+This means the request is taking too long. Possible causes:
+1. 🌐 Backend server is overloaded or slow
+2. 🔗 Network connectivity is slow
+3. 🚫 Request is being blocked somewhere
+4. 📡 DNS resolution issues
 
 Backend URL: ${API_BASE_URL}
-Please check:
-1. Internet connection
-2. Backend server status
-3. CORS configuration`;
+Try opening: ${API_BASE_URL}/api/health in your browser to test connectivity.`;
+        } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+          errorMessage = `🚨 Network/Connection Error
+          
+Error: ${error.message}
+Backend: ${API_BASE_URL}
+
+This usually means:
+1. 🌐 Backend server is down or unreachable
+2. 🔗 No internet connection
+3. 🚫 CORS policy is blocking the request
+4. 🔒 Mixed content (HTTP vs HTTPS) issue
+
+Debug steps:
+1. Open ${API_BASE_URL}/api/health in your browser
+2. Check browser network tab (F12)
+3. Check console for CORS errors`;
+        } else if (error.message.includes('Failed to fetch')) {
+          errorMessage = `🌐 Fetch Request Failed
+          
+This is typically a network or CORS issue:
+1. 🔗 Check internet connection
+2. 🚫 CORS policy blocking request
+3. 🌐 Backend server unreachable
+4. 🔒 Browser security blocking request
+
+Backend URL: ${API_BASE_URL}
+Test direct access: ${API_BASE_URL}/api/health`;
         } else {
-          errorMessage = `❌ Error: ${error.message}`;
+          errorMessage = `❌ Unexpected Error
+          
+Type: ${error.name}
+Message: ${error.message}
+Backend: ${API_BASE_URL}
+
+Check debug logs below for more details.`;
         }
+      } else {
+        errorMessage = `❌ Unknown Error Type
+        
+Error: ${String(error)}
+Backend: ${API_BASE_URL}`;
       }
       
       setExtractionResult({
@@ -146,6 +197,7 @@ Please check:
         message: errorMessage
       });
     } finally {
+      addDebugLog(`🏁 Extraction process completed. isExtracting: false`);
       setIsExtracting(false);
     }
   };
@@ -153,7 +205,7 @@ Please check:
   const handleDownloadCSV = () => {
     if (extractionResult?.data?.filename) {
       // Create download link for the CSV file
-      const downloadUrl = `${process.env.REACT_APP_API_URL || 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app'}/api/download/${extractionResult.data.filename.split('/').pop()}`;
+      const downloadUrl = `${process.env.REACT_APP_API_URL || 'https://hkgrow-6sy004yzx-thiens-projects-80bfe1b8.vercel.app'}/api/download/${extractionResult.data.filename.split('/').pop()}`;
       
       // Create a temporary link and trigger download
       const link = document.createElement('a');
@@ -292,6 +344,22 @@ Please check:
                       Start Extraction
                     </>
                   )}
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="border-blue-500/20 text-blue-400 hover:bg-blue-500/10"
+                  onClick={async () => {
+                    const API_URL = 'https://hkgrow-6sy004yzx-thiens-projects-80bfe1b8.vercel.app';
+                    try {
+                      const response = await fetch(`${API_URL}/api/health`);
+                      const result = await response.text();
+                      alert(`Health check: ${response.status} - ${result}`);
+                    } catch (e: any) {
+                      alert(`Health check failed: ${e.message}`);
+                    }
+                  }}
+                >
+                  🏥 Test
                 </Button>
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   <Filter className="w-4 h-4 mr-2" />
