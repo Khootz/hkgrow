@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Download, Play, MapPin, Filter } from "lucide-react";
+import { Search, Download, Play, MapPin, Filter, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,59 @@ export default function LeadsPage() {
   const [keywords, setKeywords] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractionResult, setExtractionResult] = useState<{
+    success: boolean;
+    message: string;
+    data?: any;
+  } | null>(null);
+
+  const handleStartExtraction = async () => {
+    if (!keywords.trim() || !location.trim()) {
+      alert("Please enter both keywords and location");
+      return;
+    }
+
+    setIsExtracting(true);
+    setExtractionResult(null);
+
+    try {
+      const response = await fetch('http://127.0.0.1:5000/api/extract-leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keywords: keywords.trim(),
+          location: location.trim(),
+          category: category
+        })
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setExtractionResult({
+          success: true,
+          message: result.message,
+          data: result.data
+        });
+      } else {
+        setExtractionResult({
+          success: false,
+          message: result.error || 'An error occurred during extraction'
+        });
+      }
+    } catch (error) {
+      console.error('Extraction failed:', error);
+      setExtractionResult({
+        success: false,
+        message: 'Failed to connect to the backend. Make sure the Python server is running.'
+      });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -50,6 +103,22 @@ export default function LeadsPage() {
           <p className="text-white/60">Extract leads from Google Maps and OpenRice</p>
         </div>
       </div>
+
+      {/* Extraction Result */}
+      {extractionResult && (
+        <div className={`p-4 rounded-lg border ${
+          extractionResult.success 
+            ? 'bg-green-500/10 border-green-500/20 text-green-400' 
+            : 'bg-red-500/10 border-red-500/20 text-red-400'
+        }`}>
+          <p>{extractionResult.message}</p>
+          {extractionResult.success && extractionResult.data && (
+            <p className="text-sm mt-2 text-white/60">
+              File saved: {extractionResult.data.filename?.split('/').pop()}
+            </p>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Form */}
@@ -105,9 +174,22 @@ export default function LeadsPage() {
               </div>
 
               <div className="flex gap-4">
-                <Button className="bg-gradient-primary hover:bg-gradient-primary/90 text-white shadow-glow flex-1">
-                  <Play className="w-4 h-4 mr-2" />
-                  Start Extraction
+                <Button 
+                  className="bg-gradient-primary hover:bg-gradient-primary/90 text-white shadow-glow flex-1"
+                  onClick={handleStartExtraction}
+                  disabled={isExtracting || !keywords.trim() || !location.trim()}
+                >
+                  {isExtracting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Extracting...
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-4 h-4 mr-2" />
+                      Start Extraction
+                    </>
+                  )}
                 </Button>
                 <Button variant="outline" className="border-white/20 text-white hover:bg-white/10">
                   <Filter className="w-4 h-4 mr-2" />
