@@ -46,6 +46,7 @@ export default function LeadsPage() {
     message: string;
     data?: any;
   } | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
 
   const handleStartExtraction = async () => {
     if (!keywords.trim() || !location.trim()) {
@@ -55,40 +56,66 @@ export default function LeadsPage() {
 
     setIsExtracting(true);
     setExtractionResult(null);
+    setDebugInfo([]);
+
+    const addDebugLog = (message: string) => {
+      const timestamp = new Date().toLocaleTimeString();
+      const logMessage = `[${timestamp}] ${message}`;
+      console.log(logMessage);
+      setDebugInfo(prev => [...prev, logMessage]);
+    };
 
     // Define API URL at the start so it's available in catch block
     const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://hkgrow-b9seecqw7-thiens-projects-80bfe1b8.vercel.app';
 
     try {
-      console.log('Connecting to backend:', `${API_BASE_URL}/api/extract-leads`);
+      addDebugLog(`🚀 Starting extraction with keywords: "${keywords}", location: "${location}"`);
+      addDebugLog(`🌐 Backend URL: ${API_BASE_URL}`);
+      addDebugLog(`📡 Making request to: ${API_BASE_URL}/api/extract-leads`);
+
+      const requestBody = {
+        keywords: keywords.trim(),
+        location: location.trim(),
+        category: category
+      };
+      
+      addDebugLog(`📦 Request payload: ${JSON.stringify(requestBody)}`);
 
       const response = await fetch(`${API_BASE_URL}/api/extract-leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          keywords: keywords.trim(),
-          location: location.trim(),
-          category: category
-        })
+        body: JSON.stringify(requestBody)
       });
 
+      addDebugLog(`📈 Response status: ${response.status} ${response.statusText}`);
+      addDebugLog(`🔍 Response headers: ${JSON.stringify(Object.fromEntries(response.headers.entries()))}`);
+
+      if (!response.ok) {
+        addDebugLog(`❌ Response not OK: ${response.status}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const result = await response.json();
+      addDebugLog(`📋 Response data: ${JSON.stringify(result, null, 2)}`);
       
       if (result.success) {
+        addDebugLog(`✅ Extraction successful: ${result.message}`);
         setExtractionResult({
           success: true,
           message: result.message,
           data: result.data
         });
       } else {
+        addDebugLog(`❌ Extraction failed: ${result.error}`);
         setExtractionResult({
           success: false,
           message: result.error || 'An error occurred during extraction'
         });
       }
     } catch (error) {
+      addDebugLog(`💥 Caught error: ${error}`);
       console.error('Extraction failed:', error);
       
       let errorMessage = 'An unexpected error occurred.';
@@ -172,6 +199,26 @@ Please check:
               </Button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Debug Panel - Temporary */}
+      {debugInfo.length > 0 && (
+        <div className="bg-black/50 border border-white/10 rounded-lg p-4">
+          <h3 className="text-white font-medium mb-2">🐛 Debug Info (Temporary)</h3>
+          <div className="max-h-60 overflow-y-auto space-y-1">
+            {debugInfo.map((log, index) => (
+              <div key={index} className="text-xs text-white/80 font-mono bg-black/30 p-2 rounded">
+                {log}
+              </div>
+            ))}
+          </div>
+          <button 
+            onClick={() => setDebugInfo([])}
+            className="mt-2 text-xs text-white/60 hover:text-white"
+          >
+            Clear Debug Logs
+          </button>
         </div>
       )}
 
