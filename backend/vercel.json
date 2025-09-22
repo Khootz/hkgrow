@@ -8,6 +8,15 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "simple_app.py",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization"
+      }
+    },
+    {
       "src": "/(.*)",
       "dest": "simple_app.py"
     }

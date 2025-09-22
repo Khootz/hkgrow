@@ -51,7 +51,7 @@ export default function LeadsPage() {
 
   // Test backend connection
   const testConnection = async () => {
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-n2ye94dqf-thiens-projects-80bfe1b8.vercel.app';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-5552mh5jc-thiens-projects-80bfe1b8.vercel.app';
     
     const addDebugLog = (message: string) => {
       const timestamp = new Date().toLocaleTimeString();
@@ -118,7 +118,7 @@ export default function LeadsPage() {
     };
 
     // Define API URL at the start so it's available in catch block
-    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-n2ye94dqf-thiens-projects-80bfe1b8.vercel.app';
+    const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-5552mh5jc-thiens-projects-80bfe1b8.vercel.app';
 
     try {
       addDebugLog(`🚀 Starting extraction with keywords: "${keywords}", location: "${location}"`);
