@@ -86,13 +86,20 @@ def save_csv(rows: list[dict], filename: str):
         print("No data to save.")
         return
     
-    # Ensure the directory exists
-    os.makedirs(os.path.dirname(filename) if os.path.dirname(filename) else '.', exist_ok=True)
-    
-    with open(filename, "w", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
-        writer.writeheader()
-        writer.writerows(rows)
+    try:
+        # Ensure the directory exists
+        dir_path = os.path.dirname(filename) if os.path.dirname(filename) else '/tmp'
+        os.makedirs(dir_path, exist_ok=True)
+        print(f"📁 Writing CSV to: {filename}")
+        
+        with open(filename, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+            writer.writeheader()
+            writer.writerows(rows)
+        print(f"✅ Saved {len(rows)} rows to {filename}")
+    except Exception as e:
+        print(f"❌ Error saving CSV: {e}")
+        raise e
     print(f"✅ Saved {len(rows)} rows to {filename}")
 
 def extract_leads(keywords: str, location: str, category: str = "") -> dict:
@@ -136,8 +143,24 @@ def extract_leads(keywords: str, location: str, category: str = "") -> dict:
         # Create filename based on keywords
         safe_keywords = "".join(c for c in keywords if c.isalnum() or c in (' ', '-', '_')).rstrip()
         safe_keywords = safe_keywords.replace(' ', '_')
-        # Use /tmp for Vercel deployment or local exports folder
-        base_dir = "/tmp" if os.environ.get("VERCEL") else "exports"
+        
+        # Enhanced Vercel/serverless environment detection
+        is_vercel = (
+            os.environ.get("VERCEL") == "1" or 
+            os.environ.get("VERCEL_ENV") is not None or 
+            "/var/task" in os.environ.get("PYTHONPATH", "") or
+            os.path.exists("/tmp") and not os.path.exists("C:\\")
+        )
+        
+        if is_vercel:
+            base_dir = "/tmp"
+            print(f"🔧 Using Vercel serverless directory: {base_dir}")
+        else:
+            base_dir = "exports"
+            print(f"🔧 Using local directory: {base_dir}")
+            
+        # Ensure directory exists
+        os.makedirs(base_dir, exist_ok=True)
         filename = f"{base_dir}/{safe_keywords}.csv"
         
         # Save to CSV
