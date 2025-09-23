@@ -20,7 +20,7 @@ import {
   Sparkles,
   Key,
   AlertCircle,
-  Target
+  Target as TargetIcon
 } from "lucide-react";
 
 interface Message {
@@ -360,7 +360,7 @@ const ChatbotPage = () => {
                 className="w-full justify-start border-border bg-card/50 text-foreground hover:bg-card"
                 onClick={() => setInputMessage("How can I improve my sales conversion rate?")}
               >
-                <Target className="w-4 h-4 mr-2" />
+                <TargetIcon className="w-4 h-4 mr-2" />
                 Sales Tips
               </Button>
               <Button 
