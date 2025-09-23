@@ -172,14 +172,14 @@ Best,
       </div>
 
       {/* Message Composer - Chat Interface Style */}
-      <Card className="border-0 bg-white/90 backdrop-blur-sm shadow-xl border border-green-500/10">
+      <Card className="border-0 bg-white/95 backdrop-blur-sm shadow-xl border border-green-500/10">
         <CardContent className="p-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600">
               <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <h2 className="text-lg font-semibold">Craft Your WhatsApp Message</h2>
-            <div className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+            <h2 className="text-lg font-semibold text-gray-900">Craft Your WhatsApp Message</h2>
+            <div className="ml-auto flex items-center gap-2 text-xs text-gray-600">
               <Clock className="h-3 w-3" />
               <span>Best time: 10AM - 6PM</span>
             </div>
@@ -195,7 +195,7 @@ Best,
                     <Users className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="font-medium">Prospect Name</h3>
+                    <h3 className="font-medium text-white">Prospect Name</h3>
                     <p className="text-xs text-green-100">Online</p>
                   </div>
                   <div className="ml-auto flex gap-2">
@@ -217,7 +217,7 @@ Best,
                     </div>
                   </div>
                 ) : (
-                  <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <div className="flex items-center justify-center h-full text-gray-500">
                     <div className="text-center">
                       <MessageCircle className="h-8 w-8 mx-auto mb-2 opacity-50" />
                       <p className="text-sm">Your message preview will appear here</p>
@@ -227,7 +227,7 @@ Best,
               </div>
 
               <div>
-                <Label htmlFor="message" className="text-foreground font-medium mb-2 block">
+                <Label htmlFor="message" className="text-gray-900 font-medium mb-2 block">
                   Your Message
                 </Label>
                 <div className="relative">
