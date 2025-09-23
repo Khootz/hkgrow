@@ -55,32 +55,32 @@ Best regards,
   const responseRate = 7.1;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/80 to-background/60 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background/80 to-background/60 p-4">
       {/* Header Section */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
+      <div className="mb-4">
+        <div className="flex items-center gap-3 mb-1">
           <div className="p-2 rounded-lg bg-gradient-to-r from-primary to-accent">
-            <Mail className="h-6 w-6 text-white" />
+            <Mail className="h-5 w-5 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
             Email Outreach Hub
           </h1>
         </div>
-        <p className="text-muted-foreground">Create compelling email campaigns and track your success</p>
+        <p className="text-sm text-muted-foreground">Create compelling email campaigns and track your success</p>
       </div>
 
       {/* Stats Dashboard */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {stats.map((stat, index) => (
           <Card key={index} className="relative overflow-hidden border-0 bg-glass backdrop-blur-xl shadow-glow">
-            <CardContent className="p-6">
+            <CardContent className="p-4">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{stat.label}</p>
-                  <p className="text-2xl font-bold">{stat.value.toLocaleString()}</p>
+                <div className="flex-1">
+                  <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
+                  <p className="text-xl font-bold">{stat.value.toLocaleString()}</p>
                 </div>
-                <div className={`p-3 rounded-full ${stat.bg}`}>
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                <div className={`p-2.5 rounded-xl ${stat.bg} ml-3 flex-shrink-0`}>
+                  <stat.icon className={`h-5 w-5 ${stat.color}`} />
                 </div>
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full animate-[shimmer_2s_infinite]" />
@@ -90,37 +90,37 @@ Best regards,
       </div>
 
       {/* Performance Metrics */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <Card className="border-0 bg-glass backdrop-blur-xl shadow-glow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              <h3 className="text-lg font-semibold">Conversion Rate</h3>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              <h3 className="text-base font-semibold">Conversion Rate</h3>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-primary">{conversionRate}%</span>
-                <span className="text-sm text-green-500 font-medium">+2.3% this month</span>
+                <span className="text-xl font-bold text-primary">{conversionRate}%</span>
+                <span className="text-xs text-green-500 font-medium">+2.3% this month</span>
               </div>
-              <Progress value={conversionRate} className="h-2" />
-              <p className="text-sm text-muted-foreground">156 conversions from 1,247 emails sent</p>
+              <Progress value={conversionRate} className="h-1.5" />
+              <p className="text-xs text-muted-foreground">156 conversions from 1,247 emails sent</p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-0 bg-glass backdrop-blur-xl shadow-glow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <BarChart3 className="h-5 w-5 text-accent" />
-              <h3 className="text-lg font-semibold">Response Rate</h3>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <BarChart3 className="h-4 w-4 text-accent" />
+              <h3 className="text-base font-semibold">Response Rate</h3>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-2xl font-bold text-accent">{responseRate}%</span>
-                <span className="text-sm text-green-500 font-medium">+1.8% this month</span>
+                <span className="text-xl font-bold text-accent">{responseRate}%</span>
+                <span className="text-xs text-green-500 font-medium">+1.8% this month</span>
               </div>
-              <Progress value={responseRate} className="h-2" />
-              <p className="text-sm text-muted-foreground">89 replies from 1,247 emails sent</p>
+              <Progress value={responseRate} className="h-1.5" />
+              <p className="text-xs text-muted-foreground">89 replies from 1,247 emails sent</p>
             </div>
           </CardContent>
         </Card>
@@ -128,15 +128,15 @@ Best regards,
 
       {/* Email Composer */}
       <Card className="border-0 bg-glass backdrop-blur-xl shadow-glow">
-        <CardContent className="p-8">
-          <div className="flex items-center gap-3 mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-gradient-to-r from-accent to-primary">
-              <Sparkles className="h-5 w-5 text-white" />
+              <Sparkles className="h-4 w-4 text-white" />
             </div>
-            <h2 className="text-xl font-semibold">Craft Your Outreach Message</h2>
+            <h2 className="text-lg font-semibold">Craft Your Outreach Message</h2>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Message Composer */}
             <div className="lg:col-span-2 space-y-6">
               <div>
