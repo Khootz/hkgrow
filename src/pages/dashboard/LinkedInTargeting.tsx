@@ -427,17 +427,17 @@ Best regards,
                     setCustomMessage(e.target.value);
                   }
                 }}
-                rows={6}
-                className="resize-none"
-              />
-              <p className="text-xs text-sidebar-foreground/60">
-                Tip: Use {"{"}{"{"} name {"}"}{"}"} and {"{"}{"{"} company {"}"}{"}"} as placeholders for personalization
+                 rows={6}
+                 className="resize-none"
+               />
+               <p className="text-xs text-sidebar-foreground/80">
+                 Tip: Use {"{"}{"{"} name {"}"}{"}"} and {"{"}{"{"} company {"}"}{"}"} as placeholders for personalization
               </p>
             </div>
 
             {/* Send Button */}
             <div className="flex items-center justify-between pt-4">
-              <p className="text-sm text-sidebar-foreground/60">
+              <p className="text-sm text-sidebar-foreground/80">
                 {selectedProfiles.length} profile(s) selected for outreach
               </p>
               <Button
