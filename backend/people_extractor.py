@@ -41,32 +41,60 @@ def calculate_similarity(text1, text2):
     return SequenceMatcher(None, text1.lower(), text2.lower()).ratio()
 
 def company_name_matches(company_name, title, threshold=0.6):
-    """Check if company name appears in title with similarity threshold"""
+    """Enhanced company name matching with multiple variations"""
     company_lower = company_name.lower()
     title_lower = title.lower()
     
-    # Direct match
-    if company_lower in title_lower:
-        return True, 1.0
+    # Create variations of company name to check
+    company_variations = [
+        company_name.lower(),
+        normalize_company_name(company_name).lower()
+    ]
     
-    # Word-by-word matching
-    company_words = company_lower.split()
-    title_words = title_lower.split()
+    # Add version without common suffixes
+    base_name = normalize_company_name(company_name)
+    if base_name != company_name:
+        company_variations.append(base_name.lower())
     
-    for company_word in company_words:
-        if len(company_word) < 3:  # Skip very short words
-            continue
-        for title_word in title_words:
-            similarity = calculate_similarity(company_word, title_word)
-            if similarity >= threshold:
-                return True, similarity
+    # Remove duplicates while preserving order
+    seen = set()
+    company_variations = [x for x in company_variations if not (x in seen or seen.add(x))]
     
-    # Segment matching
+    print(f"Checking company variations: {company_variations}")
+    
+    # Check exact matches first
+    for variation in company_variations:
+        if variation in title_lower:
+            print(f"Exact match found for '{variation}'")
+            return True, 1.0
+    
+    # Check word-by-word similarity
+    for variation in company_variations:
+        company_words = variation.split()
+        title_words = title_lower.split()
+        
+        for company_word in company_words:
+            if len(company_word) < 3:  # Skip very short words
+                continue
+            for title_word in title_words:
+                similarity = calculate_similarity(company_word, title_word)
+                if similarity >= threshold:
+                    print(f"Word match: '{company_word}' ~ '{title_word}' (similarity: {similarity:.2f})")
+                    return True, similarity
+    
+    # Check substring similarity
     max_similarity = 0
-    for i in range(len(title_lower) - len(company_lower) + 1):
-        title_segment = title_lower[i:i+len(company_lower)]
-        similarity = calculate_similarity(company_lower, title_segment)
-        max_similarity = max(max_similarity, similarity)
+    best_match = ""
+    for variation in company_variations:
+        for i in range(len(title_lower) - len(variation) + 1):
+            title_segment = title_lower[i:i+len(variation)]
+            similarity = calculate_similarity(variation, title_segment)
+            if similarity > max_similarity:
+                max_similarity = similarity
+                best_match = title_segment
+    
+    if max_similarity >= threshold:
+        print(f"Substring match: '{best_match}' (similarity: {max_similarity:.2f})")
     
     return max_similarity >= threshold, max_similarity
 
@@ -147,22 +175,44 @@ def save_to_csv(people, company_name):
         print(f"Error saving CSV: {e}")
         return None
 
-def scrape_company_people(company_name, limit=10):
+def normalize_company_name(company_name):
+    """Normalize company name for search queries"""
+    # Remove common location suffixes that might interfere with search
+    name = company_name.strip()
+    
+    # Remove HK/Hong Kong suffixes for search but keep for matching
+    search_name = name
+    location_suffixes = ['HK', 'Hong Kong', 'Ltd', 'Limited', 'Co.', 'Inc.', 'Corp.']
+    
+    for suffix in location_suffixes:
+        if search_name.endswith(f' {suffix}'):
+            search_name = search_name[:-len(f' {suffix}')].strip()
+        elif search_name.endswith(suffix):
+            search_name = search_name[:-len(suffix)].strip()
+    
+    return search_name
+
+def scrape_company_people(company_name, location="Hong Kong", limit=10):
     """Main function to scrape LinkedIn profiles for a company"""
     all_results = []
     
-    # Define search queries targeting different management levels
+    # Use normalized company name for search queries
+    search_company_name = normalize_company_name(company_name)
+    
+    print(f"Original company name: {company_name}")
+    print(f"Normalized for search: {search_company_name}")
+    print(f"Location: {location}")
+    
+    # Define search queries targeting different management levels with dynamic location
     search_queries = [
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Chief Executive Officer"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Chief Technology Officer"', 
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Chief Financial Officer"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Vice President"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Director"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Senior Director"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Manager"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Senior Manager"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Head of"',
-        f'site:linkedin.com/in/ "{company_name}" Taiwan "Partner"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Director"', 
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Manager"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Chief"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Head of"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Senior"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Vice President"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Partner"',
+        f'site:linkedin.com/in/ "{search_company_name}" {location} "Executive"',
     ]
     
     # Perform searches until we have enough results
@@ -195,8 +245,8 @@ def scrape_company_people(company_name, limit=10):
                 '/posts/' not in link.lower()
             )
             
-            # Check if company name appears in the title
-            company_matches, similarity_score = company_name_matches(company_name, title, threshold=0.6)
+            # Check if company name appears in the title with similarity threshold
+            company_matches, similarity_score = company_name_matches(company_name, title, threshold=0.5)
             
             print(f"Individual Profile: {is_individual_profile}, Company Match: {company_matches} (similarity: {similarity_score:.2f})")
             
@@ -251,13 +301,13 @@ def scrape_company_people(company_name, limit=10):
     
     return limited_results
 
-def extract_linkedin_profiles(company_name, limit=10):
+def extract_linkedin_profiles(company_name, location="Hong Kong", limit=10):
     """Main API function to extract LinkedIn profiles"""
     try:
-        print(f"Starting LinkedIn profile extraction for: {company_name}")
+        print(f"Starting LinkedIn profile extraction for: {company_name} in {location}")
         
         # Extract profiles
-        profiles = scrape_company_people(company_name, limit)
+        profiles = scrape_company_people(company_name, location, limit)
         
         if not profiles:
             return {

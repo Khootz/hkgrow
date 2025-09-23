@@ -78,19 +78,23 @@ def api_extract_linkedin_profiles():
             return jsonify({'error': 'No data provided'}), 400
         
         company_name = data.get('company_name', '').strip()
+        location = data.get('location', 'Hong Kong').strip()
         limit = data.get('limit', 10)
         
         if not company_name:
             return jsonify({'error': 'Company name is required'}), 400
         
+        if not location:
+            return jsonify({'error': 'Location is required'}), 400
+        
         # Validate limit
         if not isinstance(limit, int) or limit < 1 or limit > 50:
             limit = 10
         
-        print(f"Starting LinkedIn profile extraction for company: '{company_name}' with limit: {limit}")
+        print(f"Starting LinkedIn profile extraction for company: '{company_name}' in '{location}' with limit: {limit}")
         
         # Call the LinkedIn extraction function
-        result = extract_linkedin_profiles(company_name, limit)
+        result = extract_linkedin_profiles(company_name, location, limit)
         
         if result['success']:
             return jsonify(result)
