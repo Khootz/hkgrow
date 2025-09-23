@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/Dashboard";
 import LeadsPage from "./pages/dashboard/LeadsPage";
+import LinkedInTargeting from "./pages/dashboard/LinkedInTargeting";
 import { DashboardLayout } from "./components/dashboard/DashboardLayout";
 
 const queryClient = new QueryClient();
@@ -23,7 +24,7 @@ const App = () => (
             <Route index element={<Dashboard />} />
             <Route path="leads" element={<LeadsPage />} />
             <Route path="whatsapp" element={<div className="text-white">WhatsApp Automation - Coming Soon</div>} />
-            <Route path="linkedin" element={<div className="text-white">LinkedIn Targeting - Coming Soon</div>} />
+            <Route path="linkedin" element={<LinkedInTargeting />} />
             <Route path="email" element={<div className="text-white">Email Extraction - Coming Soon</div>} />
             <Route path="chatbot" element={<div className="text-white">AI Chatbot - Coming Soon</div>} />
             <Route path="settings" element={<div className="text-white">Settings - Coming Soon</div>} />
