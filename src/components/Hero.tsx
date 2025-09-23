@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
+import { Link } from "react-router-dom";
 import heroBackground from "@/assets/hero-bg.jpg";
 
 const Hero = () => {
@@ -39,11 +40,8 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button 
-              className="btn-gold text-lg"
-              onClick={() => window.location.href = '/dashboard'}
-            >
-              Get Started Free
+            <Button asChild className="btn-gold text-lg">
+              <Link to="/dashboard">Get Started Free</Link>
             </Button>
             <Button variant="outline" className="btn-silver text-lg">
               <Play className="w-5 h-5 mr-2" />

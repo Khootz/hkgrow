@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Navigation = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -38,7 +39,9 @@ const Navigation = () => {
 
           {/* CTA Button */}
           <div className="hidden md:flex items-center">
-            <Button className="btn-gold">Get Started</Button>
+            <Button asChild className="btn-gold">
+              <Link to="/dashboard">Get Started</Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -67,7 +70,9 @@ const Navigation = () => {
                 {item.label}
               </a>
             ))}
-            <Button className="btn-gold w-full mt-4">Get Started</Button>
+            <Button asChild className="btn-gold w-full mt-4">
+              <Link to="/dashboard">Get Started</Link>
+            </Button>
           </div>
         )}
       </div>

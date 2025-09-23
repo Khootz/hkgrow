@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Mail, MessageCircle, Linkedin } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -17,8 +18,8 @@ const Footer = () => {
               Get started with a free trial and see results in 24 hours.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button className="btn-gold text-lg px-12 py-4">
-                Get Started Free
+              <Button asChild className="btn-gold text-lg px-12 py-4">
+                <Link to="/dashboard">Get Started Free</Link>
               </Button>
               <Button variant="outline" className="btn-silver text-lg px-12 py-4">
                 Schedule Demo
