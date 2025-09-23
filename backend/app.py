@@ -3,6 +3,7 @@ from flask_cors import CORS
 import json
 import os
 from lead_extractor import extract_leads
+from people_extractor import extract_linkedin_profiles
 
 app = Flask(__name__)
 
@@ -53,6 +54,48 @@ def api_extract_leads():
         return jsonify({
             'success': False,
             'error': str(e)
+        }), 500
+
+@app.route('/api/extract-linkedin-profiles', methods=['POST', 'OPTIONS'])
+def api_extract_linkedin_profiles():
+    # Handle preflight OPTIONS request
+    if request.method == 'OPTIONS':
+        return jsonify({'status': 'OK'})
+        
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({'error': 'No data provided'}), 400
+        
+        company_name = data.get('company_name', '').strip()
+        limit = data.get('limit', 10)
+        
+        if not company_name:
+            return jsonify({'error': 'Company name is required'}), 400
+        
+        # Validate limit
+        if not isinstance(limit, int) or limit < 1 or limit > 50:
+            limit = 10
+        
+        print(f"Starting LinkedIn profile extraction for company: '{company_name}' with limit: {limit}")
+        
+        # Call the LinkedIn extraction function
+        result = extract_linkedin_profiles(company_name, limit)
+        
+        if result['success']:
+            return jsonify(result)
+        else:
+            return jsonify(result), 400
+        
+    except Exception as e:
+        print(f"Error during LinkedIn extraction: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'profiles': [],
+            'count': 0,
+            'filename': None
         }), 500
 
 @app.route('/api/health', methods=['GET'])

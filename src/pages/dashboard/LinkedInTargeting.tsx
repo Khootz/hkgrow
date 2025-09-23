@@ -87,13 +87,63 @@ const LinkedInTargeting = () => {
     }
 
     setIsSearching(true);
+    setProfiles([]);
+    setSelectedProfiles([]);
+    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      setProfiles(mockProfiles);
-      toast.success(`Found ${mockProfiles.length} management profiles for ${companyName}`);
-    } catch (error) {
-      toast.error("Failed to fetch profiles. Please try again.");
+      console.log(`🔍 Searching for LinkedIn profiles for: ${companyName}`);
+      
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-6vghzu7ui-thiens-projects-80bfe1b8.vercel.app';
+      
+      const response = await fetch(`${API_BASE_URL}/api/extract-linkedin-profiles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          company_name: companyName,
+          limit: 10
+        })
+      });
+
+      console.log(`📡 Response status: ${response.status}`);
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('📊 LinkedIn extraction result:', result);
+
+      if (result.success && result.profiles) {
+        // Transform backend data to frontend format
+        const transformedProfiles: LinkedInProfile[] = result.profiles.map((profile: any) => ({
+          id: profile.id,
+          name: profile.name,
+          title: profile.role_title,
+          company: profile.company,
+          profileUrl: profile.linkedin_url,
+          avatarUrl: "", // No avatar data from backend
+          location: profile.location || "Unknown",
+          connectionLevel: profile.connection_level || "2nd",
+          experience: profile.experience || "5+ years"
+        }));
+
+        setProfiles(transformedProfiles);
+        toast.success(`Found ${transformedProfiles.length} management profiles for ${companyName}`);
+        
+        if (transformedProfiles.length === 0) {
+          toast.info("No LinkedIn profiles found for this company. Try a different company name or check the spelling.");
+        }
+      } else {
+        throw new Error(result.error || 'Failed to extract profiles');
+      }
+    } catch (error: any) {
+      console.error('❌ LinkedIn search error:', error);
+      toast.error(`Failed to fetch profiles: ${error.message}`);
+      setProfiles([]);
     } finally {
       setIsSearching(false);
     }
