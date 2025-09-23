@@ -5,7 +5,12 @@ import requests
 import math
 from urllib.parse import urlencode
 
-API_KEY = "AIzaSyB1wtsPtU3a4zB9PwcdbhgFhgLqJlQneew"
+# Use environment variable for API key
+API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY')
+
+# Validate that required environment variable is set
+if not API_KEY:
+    raise ValueError("Missing required environment variable: GOOGLE_MAPS_API_KEY")
 
 def geocode_address(address: str) -> tuple[float, float]:
     """Geocode an address to get lat/lng coordinates."""

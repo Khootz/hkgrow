@@ -5,6 +5,15 @@ import os
 from lead_extractor import extract_leads
 from people_extractor import extract_linkedin_profiles
 
+# Load environment variables from .env file in development
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    # dotenv not installed, skip loading .env file
+    # This is fine for production environments like Vercel
+    pass
+
 app = Flask(__name__)
 
 # Enhanced CORS configuration

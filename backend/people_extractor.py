@@ -6,9 +6,13 @@ from datetime import datetime
 import os
 import tempfile
 
-# Google API credentials
-GOOGLE_API_KEY = "AIzaSyBolcztbvjV-c7tD21uzH7g4zV-F11pZdI"
-GOOGLE_CSE_ID = "124ddefbc9b4c43c3"
+# Use environment variables for API keys
+GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
+GOOGLE_CSE_ID = os.environ.get('GOOGLE_CSE_ID')
+
+# Validate that required environment variables are set
+if not GOOGLE_API_KEY or not GOOGLE_CSE_ID:
+    raise ValueError("Missing required environment variables: GOOGLE_API_KEY and/or GOOGLE_CSE_ID")
 
 def google_search(query, api_key, cse_id, max_results=10):
     """Perform Google Custom Search API call"""
