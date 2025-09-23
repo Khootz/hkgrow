@@ -226,7 +226,7 @@ Best regards,
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-sidebar-foreground">Company Name</label>
+              <label className="text-sm font-medium text-foreground">Company Name</label>
               <Input
                 placeholder="e.g., Microsoft, Google, Apple"
                 value={companyName}
@@ -235,7 +235,7 @@ Best regards,
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-sidebar-foreground">Location</label>
+              <label className="text-sm font-medium text-foreground">Location</label>
               <Input
                 placeholder="e.g., Hong Kong, Singapore, Taiwan"
                 value={location}
