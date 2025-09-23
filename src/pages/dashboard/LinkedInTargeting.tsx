@@ -37,6 +37,7 @@ interface LinkedInProfile {
 
 const LinkedInTargeting = () => {
   const [companyName, setCompanyName] = useState("");
+  const [location, setLocation] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [profiles, setProfiles] = useState<LinkedInProfile[]>([]);
   const [selectedProfiles, setSelectedProfiles] = useState<string[]>([]);
@@ -60,11 +61,17 @@ const LinkedInTargeting = () => {
       return;
     }
 
+    if (!location.trim()) {
+      toast.error("Please enter a location");
+      addLog("❌ Search failed: No location provided");
+      return;
+    }
+
     setIsSearching(true);
     setProfiles([]);
     setSelectedProfiles([]);
     
-    addLog(`🔍 Starting search for LinkedIn profiles for: ${companyName}`);
+    addLog(`🔍 Starting search for LinkedIn profiles for: ${companyName} in ${location}`);
     
     try {
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-6vghzu7ui-thiens-projects-80bfe1b8.vercel.app';
@@ -78,6 +85,7 @@ const LinkedInTargeting = () => {
         },
         body: JSON.stringify({
           company_name: companyName,
+          location: location,
           limit: 10
         })
       });
@@ -216,18 +224,31 @@ Best regards,
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-3">
-            <Input
-              placeholder="Enter company name (e.g., Microsoft, Google, Apple)"
-              value={companyName}
-              onChange={(e) => setCompanyName(e.target.value)}
-              className="flex-1"
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-sidebar-foreground">Company Name</label>
+              <Input
+                placeholder="e.g., Microsoft, Google, Apple"
+                value={companyName}
+                onChange={(e) => setCompanyName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-sidebar-foreground">Location</label>
+              <Input
+                placeholder="e.g., Hong Kong, Singapore, Taiwan"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
             <Button 
               onClick={handleSearch}
               disabled={isSearching}
-              className="btn-gold min-w-[120px]"
+              className="btn-gold min-w-[140px]"
             >
               {isSearching ? (
                 <>
