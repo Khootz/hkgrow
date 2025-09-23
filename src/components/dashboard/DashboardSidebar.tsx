@@ -51,7 +51,7 @@ export function DashboardSidebar() {
               <Zap className="w-4 h-4 text-primary-foreground" />
             </div>
             {!collapsed && (
-              <span className="text-lg font-bold text-primary">HK Grow</span>
+              <span className="text-lg font-bold text-sidebar-foreground">HK Grow</span>
             )}
           </div>
         </div>
@@ -69,13 +69,13 @@ export function DashboardSidebar() {
                       to={item.url} 
                       end 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-4 py-3 mx-2 rounded-lg border transition-all duration-200 ${isActive 
-                          ? 'bg-sidebar-accent text-sidebar-primary-foreground border-l-2 border-primary' 
-                          : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent'
+                        `flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-all duration-200 ${isActive 
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium shadow-sm border-l-4 border-sidebar-ring' 
+                          : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/60'
                         }`
                       }
                     >
-                      <item.icon className="w-4 h-4" />
+                      <item.icon className="w-4 h-4 flex-shrink-0" />
                       {!collapsed && <span className="text-sm font-medium">{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
