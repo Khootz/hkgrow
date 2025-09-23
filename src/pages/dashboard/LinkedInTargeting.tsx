@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { 
   Search, 
   Building2, 
@@ -16,7 +17,9 @@ import {
   Loader2,
   ExternalLink,
   CheckCircle,
-  User
+  User,
+  Terminal,
+  X
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -42,47 +45,18 @@ const LinkedInTargeting = () => {
   const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [messageMode, setMessageMode] = useState<"custom" | "ai">("custom");
+  const [logs, setLogs] = useState<string[]>([]);
+  const [showDebugTerminal, setShowDebugTerminal] = useState(true);
 
-  // Mock data for demonstration
-  const mockProfiles: LinkedInProfile[] = [
-    {
-      id: "1",
-      name: "Sarah Johnson",
-      title: "Chief Executive Officer",
-      company: "TechCorp Inc",
-      profileUrl: "https://linkedin.com/in/sarah-johnson",
-      avatarUrl: "",
-      location: "San Francisco, CA",
-      connectionLevel: "2nd",
-      experience: "15+ years"
-    },
-    {
-      id: "2",
-      name: "Michael Chen",
-      title: "Chief Technology Officer",
-      company: "TechCorp Inc",
-      profileUrl: "https://linkedin.com/in/michael-chen",
-      avatarUrl: "",
-      location: "Seattle, WA",
-      connectionLevel: "3rd",
-      experience: "12+ years"
-    },
-    {
-      id: "3",
-      name: "Emily Rodriguez",
-      title: "Vice President of Sales",
-      company: "TechCorp Inc",
-      profileUrl: "https://linkedin.com/in/emily-rodriguez",
-      avatarUrl: "",
-      location: "New York, NY",
-      connectionLevel: "2nd",
-      experience: "10+ years"
-    }
-  ];
+  const addLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+  };
 
   const handleSearch = async () => {
     if (!companyName.trim()) {
       toast.error("Please enter a company name");
+      addLog("❌ Search failed: No company name provided");
       return;
     }
 
@@ -90,10 +64,11 @@ const LinkedInTargeting = () => {
     setProfiles([]);
     setSelectedProfiles([]);
     
+    addLog(`🔍 Starting search for LinkedIn profiles for: ${companyName}`);
+    
     try {
-      console.log(`🔍 Searching for LinkedIn profiles for: ${companyName}`);
-      
       const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://hkgrow-6vghzu7ui-thiens-projects-80bfe1b8.vercel.app';
+      addLog(`📡 Making API request to: ${API_BASE_URL}/api/extract-linkedin-profiles`);
       
       const response = await fetch(`${API_BASE_URL}/api/extract-linkedin-profiles`, {
         method: 'POST',
@@ -107,24 +82,25 @@ const LinkedInTargeting = () => {
         })
       });
 
-      console.log(`📡 Response status: ${response.status}`);
+      addLog(`📊 Response status: ${response.status}`);
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        addLog(`❌ API Error: ${errorData.error || `HTTP ${response.status}`}`);
         throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log('📊 LinkedIn extraction result:', result);
+      addLog(`✅ API Response received: ${JSON.stringify(result, null, 2)}`);
 
       if (result.success && result.profiles) {
         // Transform backend data to frontend format
-        const transformedProfiles: LinkedInProfile[] = result.profiles.map((profile: any) => ({
-          id: profile.id,
-          name: profile.name,
-          title: profile.role_title,
-          company: profile.company,
-          profileUrl: profile.linkedin_url,
+        const transformedProfiles: LinkedInProfile[] = result.profiles.map((profile: any, index: number) => ({
+          id: profile.id || index.toString(),
+          name: profile.name || "Unknown",
+          title: profile.role_title || "Unknown Title",
+          company: profile.company || companyName,
+          profileUrl: profile.linkedin_url || "#",
           avatarUrl: "", // No avatar data from backend
           location: profile.location || "Unknown",
           connectionLevel: profile.connection_level || "2nd",
@@ -132,20 +108,24 @@ const LinkedInTargeting = () => {
         }));
 
         setProfiles(transformedProfiles);
+        addLog(`✅ Successfully processed ${transformedProfiles.length} profiles`);
         toast.success(`Found ${transformedProfiles.length} management profiles for ${companyName}`);
         
         if (transformedProfiles.length === 0) {
+          addLog("ℹ️ No profiles found for this company");
           toast.info("No LinkedIn profiles found for this company. Try a different company name or check the spelling.");
         }
       } else {
+        addLog(`❌ Backend returned unsuccessful response: ${result.error || 'No profiles'}`);
         throw new Error(result.error || 'Failed to extract profiles');
       }
     } catch (error: any) {
-      console.error('❌ LinkedIn search error:', error);
+      addLog(`❌ Search error: ${error.message}`);
       toast.error(`Failed to fetch profiles: ${error.message}`);
       setProfiles([]);
     } finally {
       setIsSearching(false);
+      addLog("🔚 Search operation completed");
     }
   };
 
@@ -335,6 +315,56 @@ Best regards,
                   </div>
                 </div>
               ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Debug Terminal */}
+      {showDebugTerminal && (
+        <Card className="glass-card">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between text-sidebar-foreground">
+              <span className="flex items-center gap-2">
+                <Terminal className="w-5 h-5" />
+                Debug Terminal
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDebugTerminal(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-48 w-full rounded border bg-sidebar/30 p-3">
+              <div className="font-mono text-sm space-y-1">
+                {logs.length === 0 ? (
+                  <div className="text-sidebar-foreground/60">No logs yet. Try searching for a company...</div>
+                ) : (
+                  logs.map((log, index) => (
+                    <div key={index} className="text-sidebar-foreground/80 whitespace-pre-wrap break-all">
+                      {log}
+                    </div>
+                  ))
+                )}
+              </div>
+            </ScrollArea>
+            <div className="flex justify-between items-center mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLogs([])}
+                className="text-xs"
+              >
+                Clear Logs
+              </Button>
+              <span className="text-xs text-sidebar-foreground/60">
+                {logs.length} log entries
+              </span>
             </div>
           </CardContent>
         </Card>
