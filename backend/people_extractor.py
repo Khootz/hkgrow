@@ -203,31 +203,17 @@ def scrape_company_people(company_name, location="Hong Kong", limit=10):
     print(f"Normalized for search: {search_company_name}")
     print(f"Location: {location}")
     
-    # Define search queries targeting different management levels with dynamic location
-    search_queries = [
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Director"', 
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Manager"',
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Chief"',
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Head of"',
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Senior"',
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Vice President"',
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Partner"',
-        f'site:linkedin.com/in/ "{search_company_name}" {location} "Executive"',
-    ]
+    # Single comprehensive search query - simple and effective
+    search_query = f'site:linkedin.com/in/ "{search_company_name}" {location}'
     
-    # Perform searches until we have enough results
-    for query in search_queries:
-        if len(all_results) >= limit:
-            break
-            
-        print(f"Searching: {query}")
-        search_results = google_search(query, GOOGLE_API_KEY, GOOGLE_CSE_ID, max_results=5)
-        
-        if not search_results:
-            print("No search results found for this query.")
-            continue
-        
-        for item in search_results:
+    print(f"\nSearching: {search_query}")
+    search_results = google_search(search_query, GOOGLE_API_KEY, GOOGLE_CSE_ID, max_results=10)
+    
+    if not search_results:
+        print("No search results found.")
+        return []
+    
+    for item in search_results:
             if len(all_results) >= limit:
                 break
                 
