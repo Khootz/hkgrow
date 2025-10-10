@@ -2,7 +2,19 @@ import requests
 from difflib import SequenceMatcher
 import csv
 import json
-from datetime import datetime
+    # Check word-by-word similarity (only for words >= 4 characters to avoid false positives)
+    for variation in company_variations:
+        company_words = variation.split()
+        title_words = title_lower.split()
+        
+        for company_word in company_words:
+            if len(company_word) < 4:  # Increased from 3 to 4 for better accuracy
+                continue
+            for title_word in title_words:
+                similarity = calculate_similarity(company_word, title_word)
+                if similarity >= threshold:
+                    print(f"Word match: '{company_word}' ~ '{title_word}' (similarity: {similarity:.2f})")
+                    return True, similarity import datetime
 import os
 import tempfile
 
@@ -62,19 +74,28 @@ def company_name_matches(company_name, title, threshold=0.6):
     
     print(f"Checking company variations: {company_variations}")
     
-    # Check exact matches first
+    # Check exact matches first (with word boundaries)
+    import re
     for variation in company_variations:
-        if variation in title_lower:
-            print(f"Exact match found for '{variation}'")
+        # Use word boundary matching to avoid partial matches
+        pattern = r'\b' + re.escape(variation) + r'\b'
+        if re.search(pattern, title_lower):
+            print(f"Exact word match found for '{variation}'")
             return True, 1.0
     
-    # Check word-by-word similarity
+    # Check for "at Company" or "@ Company" patterns (strong indicator)
+    for variation in company_variations:
+        if f' at {variation}' in title_lower or f'@ {variation}' in title_lower or f'at {variation}' in title_lower:
+            print(f"Strong context match: 'at {variation}'")
+            return True, 1.0
+    
+    # Check word-by-word similarity (only for words >= 4 characters to avoid false positives)
     for variation in company_variations:
         company_words = variation.split()
         title_words = title_lower.split()
         
         for company_word in company_words:
-            if len(company_word) < 3:  # Skip very short words
+            if len(company_word) < 4:  # Increased from 3 to 4 for better accuracy
                 continue
             for title_word in title_words:
                 similarity = calculate_similarity(company_word, title_word)
@@ -221,7 +242,8 @@ def scrape_company_people(company_name, location="Hong Kong", limit=10):
             title = item.get("title", "")
             snippet = item.get("snippet", "")
             
-            print(f"Found result: {title[:60]}...")
+            print(f"\nFound result: {title[:80]}...")
+            print(f"Snippet: {snippet[:100]}...")
             
             # Only accept individual LinkedIn profiles
             is_individual_profile = (
@@ -231,20 +253,60 @@ def scrape_company_people(company_name, location="Hong Kong", limit=10):
                 '/posts/' not in link.lower()
             )
             
-            # Check if company name appears in the title with similarity threshold
-            company_matches, similarity_score = company_name_matches(company_name, title, threshold=0.5)
+            if not is_individual_profile:
+                print("✗ REJECTED: Not an individual profile")
+                continue
             
-            print(f"Individual Profile: {is_individual_profile}, Company Match: {company_matches} (similarity: {similarity_score:.2f})")
+            # Extract name first to separate it from role
+            name = extract_name_from_title(title)
             
-            if is_individual_profile and company_matches:
-                # Extract information
-                name = extract_name_from_title(title)
-                
-                # Extract role title
-                role_title = ""
-                if " - " in title:
-                    after_dash = title.split(" - ", 1)[1]
-                    role_title = after_dash.split(" | ")[0].strip()
+            # Extract role title (the part after " - " and before " | ")
+            role_and_company = ""
+            if " - " in title:
+                role_and_company = title.split(" - ", 1)[1].split(" | ")[0].strip()
+            
+            # SMART CHECK 1: Company name should appear in role/company section, NOT in person's name
+            company_in_name = False
+            company_in_role = False
+            
+            # Check if company appears in the person's name (we want to avoid this)
+            name_lower = name.lower()
+            normalized_company = normalize_company_name(company_name).lower()
+            
+            if normalized_company in name_lower:
+                company_in_name = True
+                print(f"⚠️  WARNING: Company name '{normalized_company}' found in person's name '{name}'")
+            
+            # Check if company appears in role/company section (this is what we want)
+            if role_and_company:
+                role_lower = role_and_company.lower()
+                if normalized_company in role_lower:
+                    company_in_role = True
+                    print(f"✓ Company '{normalized_company}' found in role: {role_and_company}")
+            
+            # SMART CHECK 2: Also check snippet for company context
+            snippet_lower = snippet.lower()
+            company_in_snippet = normalized_company in snippet_lower
+            
+            # SMART CHECK 3: Use enhanced matching on role/snippet, not full title
+            company_matches_role, similarity_score = company_name_matches(
+                company_name, 
+                role_and_company + " " + snippet,  # Check role and snippet together
+                threshold=0.6  # Higher threshold for accuracy
+            )
+            
+            # DECISION LOGIC: Accept only if company appears in role/snippet, not just in name
+            is_valid_match = (
+                (company_in_role or company_in_snippet or company_matches_role) and
+                not (company_in_name and not company_in_role)  # Reject if only in name
+            )
+            
+            print(f"Validation: InName={company_in_name}, InRole={company_in_role}, InSnippet={company_in_snippet}, Match={company_matches_role}")
+            print(f"Final Decision: {'✓ VALID' if is_valid_match else '✗ INVALID'} (similarity: {similarity_score:.2f})")
+            
+            if is_valid_match:
+                # Extract role title properly
+                role_title = role_and_company
                 
                 # Extract additional info
                 location = extract_location_from_snippet(snippet)
