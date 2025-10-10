@@ -7,7 +7,8 @@ import {
   Mail, 
   Bot, 
   Settings,
-  Zap 
+  Zap,
+  TrendingUp
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,6 +29,7 @@ const menuItems = [
   { title: "LinkedIn Targeting", url: "/dashboard/linkedin", icon: Users },
   { title: "Email Extraction", url: "/dashboard/email", icon: Mail },
   { title: "AI Chatbot", url: "/dashboard/chatbot", icon: Bot },
+  { title: "Sales KPI Tracking", url: "/dashboard/sales-kpi", icon: TrendingUp },
   { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
